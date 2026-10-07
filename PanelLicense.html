@@ -1,0 +1,1990 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0c11">
+  <title>LICENSE RESELLER - Firebase</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg:#0a0c11; --surface:#12151c; --raised:#181c26; --field:#0e1117;
+      --line:#242a38; --line2:#303849;
+      --text:#eceff6; --muted:#8c94a8;
+      --blue:#5b8def; --blue2:#8db3ff; --green:#3ecf8e; --red:#f06a6a; --amber:#f5b73d;
+      --r-card:14px; --r-ctl:10px;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    .hidden{display:none!important}
+    html,body{height:100%}
+    body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:14px/1.5 "Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+    .wrap{max-width:1040px;margin:0 auto;padding:0 20px 110px}
+    svg.icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px;flex:none}
+    .glass{background:var(--surface);border:1px solid var(--line)}
+
+    /* Topbar */
+    .topbar{position:sticky;top:0;z-index:10;padding:12px 20px;margin-bottom:24px;background:rgba(10,12,17,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+    .topbar-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700;letter-spacing:-.01em}
+    .brand span{color:var(--blue2)}
+    .brand .logo{width:32px;height:32px;border-radius:9px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff}
+    .brand .logo svg{width:16px;height:16px}
+    .who-pill{display:flex;align-items:center;gap:8px;padding:4px 4px 4px 6px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:12.5px;color:var(--muted)}
+    .who-pill b{color:var(--text);font-weight:600}
+    .who-pill .avatar{width:24px;height:24px;border-radius:50%;background:var(--green);color:#05261a;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+    .who-pill button{padding:5px 11px!important;font-size:12px!important;border-radius:999px!important}
+
+    /* Login */
+    .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}
+    .login-page::before{content:"";position:absolute;width:520px;height:520px;top:-220px;left:50%;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,rgba(91,141,239,.2),transparent 68%);pointer-events:none}
+    .login-box{width:100%;max-width:380px;position:relative;z-index:1;animation:rise .4s cubic-bezier(.16,1,.3,1)}
+    @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    .login-brand{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px}
+    .login-brand .logo{width:56px;height:56px;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+    .login-brand h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em;text-align:center}
+    .login-brand h1 span{color:var(--blue2)}
+    .login-brand p{margin:0;color:var(--muted);font-size:13px;text-align:center}
+    .login-card{border-radius:18px;padding:24px}
+    .field-group{margin-bottom:14px}
+    .field-group label{display:flex;align-items:center;gap:6px;margin:0 0 7px;color:var(--muted);font-size:12.5px;font-weight:600}
+    .field-group label svg.icon{display:none}
+    .input-wrap{position:relative;display:flex;align-items:center}
+    .input-wrap svg.icon.leading{position:absolute;left:13px;width:16px;height:16px;color:var(--muted);pointer-events:none}
+    .input-wrap input{margin:0;padding-left:40px;height:46px}
+    .input-wrap input#password{padding-right:44px}
+    .pw-toggle{position:absolute;right:5px;width:36px;height:36px;padding:0!important;background:transparent!important;border:0!important;color:var(--muted)!important}
+    .pw-toggle:hover:not(:disabled){color:var(--text)!important;background:rgba(255,255,255,.06)!important}
+    .pw-toggle svg.icon{width:16px;height:16px}
+    #loginBtn{width:100%;height:46px;margin-top:6px;font-size:14px}
+    .spinner{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .7s linear infinite;display:none}
+    #loginBtn.loading .spinner,#genBtn.loading .spinner{display:inline-block}
+    #loginBtn.loading .btn-label,#genBtn.loading .btn-label{display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .login-msg{display:flex;align-items:center;gap:8px;margin-top:14px;padding:10px 12px;border-radius:var(--r-ctl);font-size:12.5px;line-height:1.4}
+    .login-msg:empty{display:none;margin:0;padding:0}
+    .login-msg svg.icon{width:15px;height:15px}
+    .login-msg.err{color:#fca5a5;background:rgba(240,106,106,.1);border:1px solid rgba(240,106,106,.28)}
+    .login-msg.ok{color:#86efac;background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.28)}
+    .login-msg.info{color:var(--muted);background:var(--raised);border:1px solid var(--line)}
+    .login-foot{text-align:center;margin-top:18px;color:var(--muted);font-size:12px}
+
+    /* Base controls */
+    .sub{color:var(--muted);margin:0 0 16px;font-size:13px}
+    .card{border-radius:var(--r-card);padding:20px;margin-bottom:16px}
+    label{display:block;color:var(--muted);font-size:12.5px;margin:0 0 6px;font-weight:600}
+    input,select{width:100%;margin-bottom:12px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--field);color:var(--text);padding:11px 12px;outline:none;font:inherit;font-size:14px;transition:border-color .15s,box-shadow .15s}
+    input::placeholder{color:#5f6779}
+    input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(91,141,239,.18)}
+    .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:start;margin-bottom:6px}
+    .row input{margin:0}
+    .row button{height:44px}
+    button{border:1px solid transparent;border-radius:var(--r-ctl);background:var(--blue);color:#fff;cursor:pointer;font:inherit;font-weight:600;font-size:13.5px;padding:10px 16px;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,transform .06s,border-color .15s;outline:none}
+    button:hover:not(:disabled){background:#6e9bf3}
+    button:active:not(:disabled){transform:scale(.97)}
+    button:focus-visible,input:focus-visible{outline:2px solid var(--blue2);outline-offset:2px}
+    button.secondary{background:var(--raised);border-color:var(--line2);color:var(--text)}
+    button.secondary:hover:not(:disabled){background:#202636}
+    button.danger{background:rgba(240,106,106,.14);border-color:rgba(240,106,106,.35);color:#ff9a9a}
+    button.danger:hover:not(:disabled){background:rgba(240,106,106,.24)}
+    button.green{background:var(--green);color:#05261a}
+    button.green:hover:not(:disabled){background:#56dba2}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .msg{min-height:0;color:var(--muted);font-size:12.5px;margin:0 0 8px}
+    .msg:empty{display:none}
+    code{font-family:var(--mono);color:var(--blue2);font-weight:600;font-size:12.5px;word-break:break-all}
+
+    /* Stats */
+    .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+    .stat{border-radius:var(--r-card);padding:14px 16px}
+    .stat small{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12.5px;font-weight:600}
+    .stat small svg.icon{width:15px;height:15px}
+    .stat strong{display:block;margin-top:6px;font-size:28px;line-height:1.1;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+    .stat-blue small svg.icon,.stat-blue strong{color:var(--blue2)}
+    .stat-green small svg.icon,.stat-green strong{color:var(--green)}
+    .stat-red small svg.icon,.stat-red strong{color:var(--red)}
+    .stat-amber small svg.icon,.stat-amber strong{color:var(--amber)}
+    h2{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:15px;font-weight:700;letter-spacing:-.01em}
+    h2 svg.icon{width:17px;height:17px;color:var(--blue2)}
+    .h2-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+    .h2-row h2{margin:0}
+    .h2-row+.sub{margin-top:0!important}
+
+    /* Lists */
+    .keylist{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+    .keyrow{background:var(--raised);border:1px solid var(--line);border-radius:12px;transition:border-color .15s}
+    .keyrow:hover{border-color:var(--line2)}
+    /* ===== Lihat key user ===== */
+    #keyCard{padding:18px}
+    .kv-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .kv-back{width:38px;height:38px;padding:0;flex:none;border-radius:11px}
+    .kv-back svg.icon{width:18px;height:18px}
+    .kv-ava{width:44px;height:44px;border-radius:13px;flex:none;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;text-transform:uppercase;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+    .kv-title{min-width:0;flex:1}
+    .kv-title b{display:block;font-size:16px;font-weight:700;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .kv-title small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}
+    .kv-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+    .kv-sum{padding:10px 6px;border-radius:12px;background:var(--field);border:1px solid var(--line);text-align:center}
+    .kv-sum b{display:block;font-size:19px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+    .kv-sum small{display:block;margin-top:3px;color:var(--muted);font-size:11px;font-weight:600}
+    .kv-sum.g b{color:var(--green)} .kv-sum.r b{color:var(--red)} .kv-sum.a b{color:var(--amber)}
+    .kv-filters{display:flex;gap:6px;margin:0 0 12px;overflow-x:auto;scrollbar-width:none}
+    .kv-filters::-webkit-scrollbar{display:none}
+    .kv-filters button{flex:none;padding:6px 13px;font-size:12.5px;border-radius:999px;background:var(--field);border:1px solid var(--line);color:var(--muted)}
+    .kv-filters button:hover:not(:disabled){background:var(--raised);color:var(--text)}
+    .kv-filters button.active{background:rgba(91,141,239,.14);border-color:rgba(91,141,239,.45);color:var(--blue2)}
+    #keyCard .toolbar{margin-bottom:12px}
+    #keyCard .keylist{margin-top:6px;gap:10px}
+
+    .keyrow{background:var(--raised);border:1px solid var(--line);border-radius:14px;transition:border-color .15s,background .15s}
+    .keyrow:hover{border-color:var(--line2);background:#1b202c}
+    .kr-body{position:relative;padding:14px 14px 12px 18px}
+    .kr-body::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--muted);opacity:.5}
+    .keyrow.st-active .kr-body::before{background:var(--green);opacity:1}
+    .keyrow.st-expired .kr-body::before{background:var(--red);opacity:1}
+    .kr-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .kr-head-main{min-width:0;flex:1}
+    .kr-title{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .kr-tags{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px}
+    .kr-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em;white-space:nowrap;color:var(--muted);background:var(--field);border:1px solid var(--line)}
+    .kr-badge.dot::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+    .kr-badge.s-active{color:var(--green);background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.3)}
+    .kr-badge.s-expired{color:var(--red);background:rgba(240,106,106,.1);border-color:rgba(240,106,106,.3)}
+    .kr-badge.t-vip{color:var(--amber);background:rgba(245,183,61,.1);border-color:rgba(245,183,61,.3)}
+    .kr-badge.t-free{color:var(--blue2);background:rgba(91,141,239,.1);border-color:rgba(91,141,239,.3)}
+    .kr-badge.t-res{color:var(--green);background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.3)}
+    .kr-keybox{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:11px 12px;border-radius:11px;background:var(--field);border:1px dashed var(--line2);color:var(--text);text-align:left;font-weight:500}
+    .kr-keybox:hover:not(:disabled){background:rgba(91,141,239,.07);border-color:rgba(91,141,239,.5)}
+    .kr-keybox code{font-size:13.5px;letter-spacing:.02em}
+    .kr-keybox svg.icon{width:15px;height:15px;color:var(--muted)}
+    .kr-keybox:hover svg.icon{color:var(--blue2)}
+    .kr-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+    .kr-field{display:flex;flex-direction:column;gap:4px;min-width:0;padding:10px 12px;border-radius:11px;background:var(--field);border:1px solid var(--line)}
+    .kr-field small{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:11.5px;font-weight:600}
+    .kr-field small svg.icon{width:12px;height:12px}
+    .kr-field b{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+    .kr-field b.exp-soon{color:var(--amber)}
+    .kr-field b.exp-out{color:var(--red)}
+    .kr-field b.exp-never{color:var(--green)}
+    .kr-field b.ok{color:var(--green)}
+    .kr-field b.full{color:var(--red)}
+    .kr-bar{height:4px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:2px}
+    .kr-bar i{display:block;height:100%;border-radius:4px;background:var(--green);transition:width .3s}
+    .kr-bar.full i{background:var(--red)}
+    .kr-foot{margin-top:10px;color:var(--muted);font-size:11.5px}
+    .kr-actions{position:relative;flex:none}
+    .kr-actions>button{width:34px;height:34px;padding:0;margin:-4px -4px 0 0;border-radius:9px;background:transparent;border-color:transparent;color:var(--muted)}
+    .kr-actions>button:hover:not(:disabled){background:var(--field);color:var(--text)}
+    .kr-actions>button svg.icon{width:16px;height:16px}
+    .res-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--raised)}
+    .res-left{display:flex;align-items:center;gap:12px;min-width:0}
+    .res-row b{font-size:14px;font-weight:600}
+    .res-row small{display:block;color:var(--muted);font-size:12.5px}
+    .res-row .res-btns{display:flex;gap:6px}
+    .res-row .res-btns button{padding:7px 12px;font-size:12.5px}
+    #resAppList .res-row{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+    #resAppList .res-thumb{pointer-events:none;-webkit-user-drag:none}
+    .res-row.dragging{position:relative;z-index:5;background:#202636;border-color:var(--blue);box-shadow:0 14px 30px rgba(0,0,0,.55);cursor:grabbing}
+    .reordering{cursor:grabbing}
+    .res-row.is-off .res-left{opacity:.5}
+    .res-thumb,#resLogoPrev{width:42px;height:42px;border-radius:10px;object-fit:cover;flex:none;border:1px solid var(--line)}
+    .keylist-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 20px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line2);border-radius:12px}
+    .keylist-empty svg.icon{width:28px;height:28px;opacity:.5}
+
+    /* Action menu: dropdown on desktop, bottom sheet on mobile */
+    .kr-menu{display:none;position:absolute;right:0;top:calc(100% + 6px);z-index:60;width:230px;padding:6px;flex-direction:column;gap:2px;background:var(--surface);border:1px solid var(--line2);border-radius:12px;box-shadow:0 18px 40px rgba(0,0,0,.55);animation:rise .14s ease-out}
+    .kr-menu.open{display:flex}
+    .kr-menu-head{display:none;align-items:center;justify-content:space-between;padding:4px 6px 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+    .kr-menu-head span{font-size:14px;font-weight:700}
+    .kr-menu-close{width:32px;height:32px;padding:0;border-radius:9px;background:var(--raised);border-color:var(--line2);color:var(--text)}
+    .kr-menu .kr-menu-close{width:36px;height:36px;min-height:0;padding:0;justify-content:center;flex:none;background:var(--raised);border:1px solid var(--line2)}
+    .kr-menu .kr-menu-close:hover:not(:disabled){background:#202636}
+    .kr-menu-close svg.icon{width:16px;height:16px}
+    .kr-menu button{justify-content:flex-start;gap:11px;padding:9px 12px;border-radius:8px;background:transparent;color:var(--text);font-weight:500;font-size:13.5px;text-align:left}
+    .kr-menu button svg.icon{width:16px;height:16px;color:var(--muted)}
+    .kr-menu button.danger-text svg.icon{color:var(--red)}
+    .kr-menu-label{padding:6px 12px 3px;color:var(--muted);font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+    .kr-menu button:hover:not(:disabled){background:var(--raised)}
+    .kr-menu button.danger-text{color:var(--red)}
+    .kr-menu button.danger-text:hover:not(:disabled){background:rgba(240,106,106,.12)}
+    .kr-menu-sep{height:1px;margin:4px 2px;background:var(--line);flex:none}
+
+    /* Tabs, toolbar */
+    .tabs{display:flex;gap:4px;margin:14px 0;padding:4px;border-radius:12px;background:var(--field);border:1px solid var(--line)}
+    .tab-btn{flex:1;background:transparent;border:0;color:var(--muted);padding:9px 12px;border-radius:9px;font-weight:600}
+    .tab-btn:hover:not(:disabled){background:var(--raised);color:var(--text)}
+    .tab-btn .tab-count{margin-left:4px;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--raised);color:var(--muted)}
+    .tab-btn.active{background:var(--raised);color:var(--text);box-shadow:0 0 0 1px var(--line2)}
+    .tab-btn.active[data-tab="vip"]{color:var(--amber)}
+    .tab-btn.active[data-tab="free"]{color:var(--blue2)}
+    .tab-btn.active[data-ctab="credit"]{color:var(--blue2)}
+    .tab-btn.active[data-ctab="nocredit"]{color:var(--amber)}
+    #credTabs{margin:0 0 12px}
+    .cred-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
+    .cred-stat{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,var(--raised),var(--field))}
+    .cred-stat .ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none;background:rgba(91,141,239,.14);color:var(--blue2)}
+    .cred-stat .ic.g{background:rgba(62,207,142,.14);color:var(--green)}
+    .cred-stat .ic svg.icon{width:18px;height:18px}
+    .cred-stat b{display:block;font-size:20px;font-weight:800;line-height:1.1;letter-spacing:-.01em}
+    .cred-stat small{display:block;margin-top:2px;color:var(--muted);font-size:12px}
+    #credList{gap:8px;max-height:min(440px,60vh);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;margin-right:-4px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+    #credList::-webkit-scrollbar{width:6px}
+    #credList::-webkit-scrollbar-thumb{background:var(--line2);border-radius:6px}
+    #credSearch{margin:0 0 10px}
+    .count-pill{display:inline-flex;align-items:center;justify-content:center;min-width:22px;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:700;color:var(--muted);background:var(--raised);border:1px solid var(--line)}
+    .app-hint{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+    #resAppList{gap:8px;margin-top:12px}
+    #resAppList .app-row{position:relative;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 10px;border-radius:14px;transition:border-color .15s,background .15s}
+    #resAppList .app-row:hover{border-color:var(--line2);background:#1b202c}
+    #resAppList .app-row.dragging:hover{background:#202636;border-color:var(--blue)}
+    .app-grip{flex:none;display:flex;align-items:center;color:var(--line2);pointer-events:none}
+    .app-grip svg.icon{width:16px;height:16px}
+    .app-main{display:flex;align-items:center;gap:12px;flex:1;min-width:0;transition:opacity .15s}
+    .app-row.is-off .app-main{opacity:.5}
+    .app-ava{position:relative;width:46px;height:46px;border-radius:12px;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;text-transform:uppercase;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+    .app-ava img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
+    .app-info{min-width:0}
+    .app-info b{display:block;font-size:14.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .app-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:5px}
+    .app-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:600;color:var(--muted);background:var(--field);border:1px solid var(--line);white-space:nowrap}
+    .app-chip.mono{font-family:var(--mono);font-weight:500;color:var(--text)}
+    .app-chip svg.icon{width:11px;height:11px}
+    .app-chip.on{color:var(--green);border-color:rgba(62,207,142,.3);background:rgba(62,207,142,.1)}
+    .app-chip.on::before,.app-chip.off::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+    .app-actions{display:flex;align-items:center;gap:6px;flex:none}
+    #resAppList .app-toggle{gap:8px;padding:4px 8px 4px 4px;background:transparent;border:0;color:var(--muted);font-size:12.5px;min-height:0;border-radius:999px}
+    #resAppList .app-toggle:hover:not(:disabled){background:var(--field)}
+    .app-toggle .track{position:relative;width:34px;height:20px;border-radius:999px;background:var(--line2);flex:none;transition:background .18s}
+    .app-toggle .track i{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform .18s}
+    .app-toggle[aria-checked="true"] .track{background:var(--green)}
+    .app-toggle[aria-checked="true"] .track i{transform:translateX(14px)}
+    .app-toggle[aria-checked="true"]{color:var(--text)}
+    #resAppList .app-icobtn{width:36px;height:36px;padding:0;border-radius:10px}
+    #resAppList .app-icobtn svg.icon{width:16px;height:16px}
+    .cred-row{position:relative;display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--raised);transition:border-color .15s,transform .15s,background .15s}
+    .cred-row::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:var(--green)}
+    .cred-row.is-low::before{background:var(--amber)}
+    .cred-row.is-zero::before{background:var(--line2)}
+    .cred-row:hover{border-color:var(--line2);background:#1b202c}
+    .cred-avatar{width:42px;height:42px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;text-transform:uppercase;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+    .cred-info{flex:1;min-width:0}
+    .cred-info b{display:block;font-size:14.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .cred-meta{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;margin-top:5px}
+    .cred-chip{flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:600;color:var(--muted);background:var(--field);border:1px solid var(--line)}
+    .cred-chip svg.icon{width:11px;height:11px}
+    .cred-chip.link{color:var(--blue2);border-color:rgba(91,141,239,.35);background:rgba(91,141,239,.1)}
+    .cred-amount{flex:none;min-width:58px;padding:6px 12px;border-radius:12px;text-align:center;background:rgba(62,207,142,.1);border:1px solid rgba(62,207,142,.3);color:var(--green)}
+    .cred-amount strong{display:block;font-size:19px;font-weight:800;line-height:1.1}
+    .cred-amount span{display:block;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;opacity:.8}
+    .cred-row.is-low .cred-amount{background:rgba(245,183,61,.1);border-color:rgba(245,183,61,.35);color:var(--amber)}
+    .cred-row.is-zero .cred-amount{background:var(--field);border-color:var(--line);color:var(--muted)}
+    .cred-row .kr-actions>button{margin:0}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .search-wrap{position:relative;flex:1 1 200px;min-width:0}
+    .search-wrap svg.icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
+    .search-wrap input{padding-left:36px;margin:0}
+    #refreshBtn{flex:none;white-space:nowrap}
+
+    /* Generate modal */
+    .fab{position:fixed;right:20px;bottom:20px;z-index:50;width:56px;height:56px;padding:0;border-radius:50%;box-shadow:0 10px 26px rgba(91,141,239,.4)}
+    .fab svg.icon{width:24px;height:24px}
+    .gen-overlay,.modal-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,6,10,.7);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+    .gen-modal{width:100%;max-width:560px;max-height:92vh;overflow-y:auto;margin:0;animation:rise .22s cubic-bezier(.16,1,.3,1)}
+    .gen-close{width:34px;height:34px;padding:0}
+    .gen-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px}
+    .gen-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+    .gen-field label{display:flex;align-items:center;gap:6px;margin:0}
+    .gen-field label svg.icon{display:none}
+    .gen-field label .req{color:var(--red)}
+    .gen-field input,.gen-field select{margin:0;height:44px}
+    .paste-wrap{position:relative;display:flex}
+    .paste-wrap input{padding-right:50px}
+    .paste-wrap button{position:absolute;right:4px;top:4px;width:36px;height:36px;padding:0;border-radius:8px}
+    .paste-wrap button svg.icon{width:16px;height:16px}
+    .gen-field-submit,.gen-field-wide{grid-column:1/-1}
+    .gen-field-submit label{display:none}
+    #genBtn{width:100%;height:46px;font-size:14px}
+    #genBtn svg.icon{width:16px;height:16px}
+    .result.gen-result{margin-top:16px;border-radius:12px;overflow:hidden;background:rgba(62,207,142,.06);border:1px solid rgba(62,207,142,.3)}
+    .gen-result-head{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:13px;font-weight:600;color:#86efac;background:rgba(62,207,142,.1)}
+    .gen-result-body{display:flex;flex-direction:column;gap:6px;padding:12px 14px}
+    .gen-key-chip{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-radius:9px;background:var(--field);border:1px solid var(--line);cursor:pointer;transition:border-color .15s}
+    .gen-key-chip:hover{border-color:rgba(91,141,239,.5)}
+    .gen-key-chip code{font-size:13px}
+    .gen-key-chip svg.icon{width:14px;height:14px;color:var(--muted)}
+
+    /* Dialogs */
+    .confirm-overlay{z-index:150}
+    .modal-box{width:100%;max-width:360px;padding:20px;border-radius:16px;background:var(--surface);border:1px solid var(--line2);animation:rise .2s cubic-bezier(.16,1,.3,1)}
+    .confirm-title{margin:0 0 6px;font-size:16px;font-weight:700}
+    .confirm-text{margin:0 0 16px;color:var(--muted);font-size:13.5px;line-height:1.5;word-break:break-word}
+    .confirm-box input{margin-bottom:16px;height:44px;text-align:center;font-size:16px;font-weight:700}
+    .confirm-actions,.modal-actions{display:flex;gap:10px}
+    .confirm-actions button{flex:1}
+    .modal-actions{justify-content:flex-end}
+    .modal-sub{margin:0 0 14px;color:var(--muted);font-size:13px}
+    .modal-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .modal-ic{width:40px;height:40px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(91,141,239,.14);color:var(--blue2)}
+    .modal-ic svg.icon{width:19px;height:19px}
+    .modal-head b{display:block;font-size:15.5px;font-weight:700}
+    .modal-head small{display:block;margin-top:1px;color:var(--muted);font-size:12.5px;word-break:break-all}
+    .modal-hint{margin:-4px 0 16px;color:var(--muted);font-size:12px;text-align:center}
+    .modal-actions button{flex:1}
+    .modal-stepper{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .modal-stepper button{width:44px;height:44px;padding:0;font-size:20px;background:var(--raised);border-color:var(--line2);color:var(--text);flex:none}
+    .modal-stepper input{margin:0;height:44px;text-align:center;font-size:18px;font-weight:700}
+
+    /* Toast */
+    .toast-stack{position:fixed;left:50%;bottom:88px;z-index:200;transform:translateX(-50%);display:flex;flex-direction:column-reverse;align-items:center;gap:8px;pointer-events:none;width:max-content;max-width:calc(100vw - 24px)}
+    .toast{pointer-events:auto;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line2);box-shadow:0 12px 30px rgba(0,0,0,.5);animation:rise .18s ease-out;max-width:360px}
+    .toast.leaving{opacity:0;transform:translateY(6px);transition:.15s}
+    .toast-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex:none}
+    .toast-icon svg.icon{width:18px;height:18px}
+    .toast.ok .toast-icon{color:var(--green)}
+    .toast.err .toast-icon{color:var(--red)}
+    .toast.info .toast-icon{color:var(--blue2)}
+    .toast-text{flex:1;min-width:0;font-size:13px;line-height:1.35;word-break:break-word}
+    .toast .toast-close{padding:4px;background:transparent;color:var(--muted);border:0}
+    .toast .toast-close:hover:not(:disabled){background:var(--raised);color:var(--text)}
+    .toast .toast-close svg.icon{width:12px;height:12px}
+
+    @media (max-width:640px){
+      .wrap{padding:0 14px 110px}
+      .topbar{padding:10px 14px;margin-bottom:18px}
+      .who-pill .who-text{display:none}
+      .card{padding:16px}
+      .gen-grid{grid-template-columns:1fr}
+      .kv-summary{gap:6px}
+      .kv-sum b{font-size:17px}
+      #keyCard{padding:14px}
+      .gen-overlay{align-items:flex-end;padding:0}
+      .gen-modal{max-width:none;border-radius:18px 18px 0 0;max-height:90vh}
+      .res-row{flex-wrap:wrap}
+      #resAppList .app-row{flex-wrap:wrap;padding:12px}
+      .app-grip{display:none}
+      .app-main{flex-basis:100%}
+      .app-actions{flex-basis:100%;justify-content:space-between;padding-top:10px;border-top:1px solid var(--line)}
+      .app-actions .app-btns{display:flex;gap:6px}
+      .app-ava{width:42px;height:42px;font-size:16px}
+      .cred-row{flex-wrap:nowrap;gap:10px;padding:11px 8px 11px 12px}
+      .cred-avatar{width:38px;height:38px;font-size:15px}
+      .cred-amount{min-width:50px;padding:5px 9px}
+      .cred-stat{padding:10px 12px}
+      .cred-stat b{font-size:18px}
+      .kr-menu{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));border-radius:18px 18px 0 0;box-shadow:0 0 0 100vmax rgba(4,6,10,.65)}
+      .kr-menu-head{display:flex}
+      .kr-menu button{min-height:50px;font-size:15.5px;padding:12px 14px}
+      .toast-stack{bottom:90px}
+    }
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div id="loginScreen" class="login-page">
+    <div class="login-box">
+      <div class="login-brand">
+        <div class="logo"><img src="data:image/png;base64,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" alt="" style="width:100%;height:100%;object-fit:contain;display:block"></div>
+        <h1>LICENSE <span>RESELLER</span></h1>
+        <p>Panel admin khusus reseller</p>
+      </div>
+      <form id="loginForm" class="login-card glass" autocomplete="on">
+        <div class="field-group">
+          <label for="email"><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>Email</label>
+          <div class="input-wrap">
+            <svg class="icon leading" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
+            <input id="email" type="email" autocomplete="username" placeholder="admin@domain.com" required>
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="password"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Password</label>
+          <div class="input-wrap">
+            <svg class="icon leading" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input id="password" type="password" autocomplete="current-password" placeholder="Password admin" required>
+            <button type="button" id="pwToggle" class="pw-toggle" aria-label="Tampilkan password">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button id="loginBtn" type="submit">
+          <span class="spinner"></span>
+          <span class="btn-label"><svg class="icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>Masuk</span>
+        </button>
+        <div id="loginMsg" class="login-msg"></div>
+      </form>
+      <p class="login-foot">Akses terbatas untuk admin yang berwenang.</p>
+    </div>
+  </div>
+
+  <div id="adminScreen" class="hidden">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="logo"><svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5 20 3M17 6l3 3M14 9l2 2"/></svg></div>
+          LICENSE <span>RESELLER</span>
+        </div>
+        <div class="who-pill">
+          <div class="avatar" id="whoAvatar">A</div>
+          <span class="who-text">Masuk sebagai <b id="who"></b></span>
+          <button id="logoutBtn" class="danger">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+    <div class="tabs hidden" id="mainNav">
+      <button type="button" class="tab-btn active" data-view="panel">License Panel</button>
+      <button type="button" class="tab-btn" data-view="reseller">License Reseller <span class="tab-count" id="countRes">0</span></button>
+    </div>
+    <div class="stats" id="statsRow">
+      <div class="stat glass stat-blue"><small><svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5 20 3M17 6l3 3M14 9l2 2"/></svg>Total Key</small><strong id="total">0</strong></div>
+      <div class="stat glass stat-green"><small><svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Akun</small><strong id="active">0</strong></div>
+    </div>
+
+    <section id="resCredits" class="card glass hidden">
+      <div class="h2-row"><h2><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg>Credit Reseller</h2></div>
+      <div class="tabs" id="credTabs">
+        <button type="button" class="tab-btn active" data-ctab="credit">Credit <span class="tab-count" id="countCredit">0</span></button>
+        <button type="button" class="tab-btn" data-ctab="nocredit">No Credit <span class="tab-count" id="countNoCredit">0</span></button>
+      </div>
+      <div class="cred-summary">
+        <div class="cred-stat"><div class="ic"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M17 11a3 3 0 1 0 0-6M21.5 20c0-2.6-1.7-4.6-4-5.5"/></svg></div><div><b id="statReseller">0</b><small>Total reseller</small></div></div>
+        <div class="cred-stat"><div class="ic g"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/></svg></div><div><b id="statCredit">0</b><small>Total credit</small></div></div>
+      </div>
+      <input id="credSearch" type="search" placeholder="Cari nama reseller" autocomplete="off">
+      <div id="credList" class="keylist"></div>
+    </section>
+
+    <section id="resApps" class="card glass hidden">
+      <div class="h2-row"><h2><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>App ID Reseller <span class="count-pill" id="appCount">0</span></h2></div>
+      <p class="app-hint">Tahan lalu geser baris untuk mengatur urutan.</p>
+      <div id="resAppList" class="keylist"></div>
+    </section>
+
+    <section id="keyCard" class="card glass hidden">
+      <div class="kv-head">
+        <button id="keyBack" class="secondary kv-back" type="button" aria-label="Kembali" title="Kembali"><svg class="icon" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+        <div class="kv-ava" id="keyAva">?</div>
+        <div class="kv-title"><b id="keyTitle">Daftar Key</b><small id="keySub"></small></div>
+      </div>
+      <div class="kv-summary" id="keySummary"></div>
+      <div class="kv-filters" id="keyFilters">
+        <button type="button" class="active" data-kf="all">Semua</button>
+        <button type="button" data-kf="active">Aktif</button>
+        <button type="button" data-kf="expired">Kedaluwarsa</button>
+        <button type="button" data-kf="disabled">Nonaktif</button>
+      </div>
+      <div class="tabs" id="tabs">
+        <button type="button" class="tab-btn active" data-tab="vip">VIP <span class="tab-count" id="countVip">0</span></button>
+        <button type="button" class="tab-btn" data-tab="free">FREE <span class="tab-count" id="countFree">0</span></button>
+      </div>
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="search" placeholder="Cari key atau catatan">
+        </div>
+        <button id="refreshBtn" class="secondary">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+          Refresh
+        </button>
+      </div>
+      <div id="listMsg" class="msg"></div>
+      <div id="keyList" class="keylist"></div>
+    </section>
+
+    <div id="resAppOverlay" class="gen-overlay hidden">
+    <section class="card glass gen-modal">
+      <div class="h2-row">
+        <h2><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>App ID Reseller</h2>
+        <button type="button" id="resAppClose" class="secondary gen-close" aria-label="Tutup"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="gen-grid">
+        <div class="gen-field"><label for="resAppId">App ID</label><input id="resAppId" placeholder="mis. app1" autocomplete="off"></div>
+        <div class="gen-field"><label for="resAppName">Nama aplikasi</label><input id="resAppName" placeholder="Nama aplikasi" autocomplete="off"></div>
+        <div class="gen-field gen-field-wide"><label for="resAppLogo">Link logo</label><div class="paste-wrap"><input id="resAppLogo" type="url" autocomplete="off"><button type="button" id="resAppPaste" class="secondary paste-btn" data-target="resAppLogo" aria-label="Tempel link" title="Tempel link"><svg class="icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button></div></div>
+        <div class="gen-field gen-field-wide"><label for="resAppApk">Link APK</label><div class="paste-wrap"><input id="resAppApk" type="url" autocomplete="off"><button type="button" class="secondary paste-btn" data-target="resAppApk" aria-label="Tempel link" title="Tempel link"><svg class="icon" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button></div></div>
+        <div class="gen-field gen-field-submit"><button id="resAppSave" type="button">Simpan</button></div>
+      </div>
+    </section>
+    </div>
+
+    <div id="genOverlay" class="gen-overlay hidden">
+    <section class="card glass gen-modal">
+      <div class="h2-row">
+        <h2><svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5 20 3M17 6l3 3M14 9l2 2"/></svg>Generate Key</h2>
+        <button type="button" id="genClose" class="secondary gen-close" aria-label="Tutup"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="gen-grid">
+        <div class="gen-field">
+          <label><svg class="icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4z" opacity="0"/><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Title <span class="req">*</span></label>
+          <input id="genNote" placeholder="Nama" required>
+        </div>
+        <div class="gen-field">
+          <label><svg class="icon" viewBox="0 0 24 24"><path d="m12 2 3 7 7 .6-5.3 4.7 1.6 7.2L12 17.8 5.7 21.5l1.6-7.2L2 9.6 9 9z"/></svg>Tipe Key</label>
+          <select id="genTier">
+            <option value="vip">VIP</option>
+            <option value="free">FREE</option>
+          </select>
+        </div>
+        <div class="gen-field">
+          <label><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Jumlah</label>
+          <input id="genCount" type="number" min="1" max="200" value="1">
+        </div>
+        <div class="gen-field">
+          <label><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h4"/></svg>App ID</label>
+          <input id="genAppId" value="app1" placeholder="mis. app1">
+        </div>
+        <div class="gen-field">
+          <label><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Masa berlaku (hari)</label>
+          <input id="genExpiry" type="number" min="0" placeholder="0 = selamanya">
+        </div>
+        <div class="gen-field">
+          <label><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>Maks device</label>
+          <input id="genMax" type="number" min="0" value="0" placeholder="0 = tak terbatas">
+        </div>
+        <div class="gen-field gen-field-submit">
+          <label>&nbsp;</label>
+          <button id="genBtn">
+            <span class="spinner"></span>
+            <span class="btn-label"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Generate</span>
+          </button>
+        </div>
+      </div>
+      <div id="genResult" class="result gen-result hidden"></div>
+    </section>
+    </div>
+    </div>
+    <button type="button" id="genFab" class="fab" aria-label="Generate key" title="Generate key"><svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5 20 3M17 6l3 3M14 9l2 2"/></svg></button>
+    <div id="toastStack" class="toast-stack"></div>
+  </div>
+
+  <script>
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAI9d8eTeVafEdQicjwcLaYRUA75xYDmQI",
+      authDomain: "tarzmodz-1dbab.firebaseapp.com",
+      databaseURL: "https://tarzmodz-1dbab-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "tarzmodz-1dbab",
+      storageBucket: "tarzmodz-1dbab.firebasestorage.app",
+      messagingSenderId: "886882124675",
+      appId: "1:886882124675:web:6255a2b03a30e21fb1ecb6"
+    };
+    const PUBLIC_PATH = 'licenses';
+    const PRIVATE_PATH = 'adminKeys';
+    const DEVICE_PATH = 'deviceRegs';
+    const RESELLER_PATH = 'resellerKeys'; // antrian key dari web reseller
+    const DELETE_PATH = 'resellerDeletes'; // permintaan hapus key dari web reseller
+    const APPS_PATH = 'resellerApps';     // daftar App ID publik untuk web reseller
+    const APP_ID_FIELD = 'app';
+    const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+    const $ = (id) => document.getElementById(id);
+    const state = { records: {}, devices: {}, devicesOk: true, tab: 'reseller', view: 'reseller', credTab: 'credit', viewUser: null, keyFilter: 'all', resellerApps: {}, users: {} };
+    // Key lama tanpa field tier otomatis dianggap VIP
+    function tierOf(record) { return record && record.tier === 'free' ? 'free' : 'vip'; }
+    function isRes(record) { return !!(record && record.reseller); }
+    function buildApps() { return state.resellerApps || {}; }
+    const labels = { active: 'Aktif', expired: 'Expired', disabled: 'Nonaktif' };
+
+    firebase.initializeApp(FIREBASE_CONFIG);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    function normalizeCode(value) {
+      return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+
+    async function sha256Hex(value) {
+      const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+      return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function makeCode() {
+      const raw = new Uint32Array(5);
+      crypto.getRandomValues(raw);
+      let value = '';
+      for (const n of raw) value += ALPHABET[n % ALPHABET.length];
+      return 'TARZ-' + value;
+    }
+
+    function statusOf(record) {
+      if (record.off) return 'disabled';
+      if (record.exp && record.exp < Date.now()) return 'expired';
+      return 'active';
+    }
+
+    function allRecords() {
+      return Object.keys(state.records)
+        .map((h) => Object.assign({ h }, state.records[h]))
+        .sort((a, b) => {
+          const ta = a.createdAt ? Date.parse(a.createdAt) : 0;
+          const tb = b.createdAt ? Date.parse(b.createdAt) : 0;
+          return tb - ta;
+        });
+    }
+
+    function buildLicensesPayload(records) {
+      return {
+        version: 1,
+        updatedAt: new Date().toISOString(),
+        keys: Object.keys(records).map((h) => {
+          const r = records[h];
+          const max = Math.max(parseInt(r.max, 10) || 0, 0);
+          return { h, app: r.app || '', exp: r.exp || 0, off: !!r.off, max };
+        })
+      };
+    }
+
+    function deviceCount(hash) {
+      const entry = state.devices[hash];
+      if (!entry || typeof entry !== 'object') return 0;
+      return Object.keys(entry).length;
+    }
+
+    function maxOf(record) {
+      return Math.max(parseInt(record.max, 10) || 0, 0);
+    }
+
+    function friendlyError(error) {
+      const code = (error && error.code) || '';
+      const map = {
+        'auth/invalid-credential': 'Email atau password salah.',
+        'auth/user-not-found': 'Email atau password salah.',
+        'auth/wrong-password': 'Email atau password salah.',
+        'auth/invalid-email': 'Format email tidak valid.',
+        'auth/too-many-requests': 'Terlalu banyak percobaan. Tunggu sebentar.',
+        'auth/network-request-failed': 'Tidak bisa terhubung. Cek internet.',
+        'auth/operation-not-allowed': 'Login Email/Password belum diaktifkan di Firebase Console (Authentication > Sign-in method).',
+        'auth/user-disabled': 'Akun ini dinonaktifkan.',
+        'PERMISSION_DENIED': 'Rules Firebase menolak. Paste database.rules.json ke Realtime Database > Rules.'
+      };
+      if (map[code]) return map[code];
+      if (String(code).indexOf('PERMISSION_DENIED') >= 0) return map.PERMISSION_DENIED;
+      return (error && error.message) || 'Terjadi kesalahan.';
+    }
+
+    function setMsg(id, text, kind) {
+      const el = $(id);
+      el.textContent = text || '';
+      el.className = 'msg' + (kind ? ' ' + kind : '');
+    }
+
+    const LOGIN_MSG_ICONS = {
+      err: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>',
+      ok: '<svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>',
+      info: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>'
+    };
+    function setLoginMsg(text, kind) {
+      const el = $('loginMsg');
+      if (!text) {
+        el.textContent = '';
+        el.className = 'login-msg';
+        return;
+      }
+      const icon = LOGIN_MSG_ICONS[kind] || LOGIN_MSG_ICONS.info;
+      el.innerHTML = icon + '<span>' + text + '</span>';
+      el.className = 'login-msg' + (kind ? ' ' + kind : ' info');
+    }
+
+    const TOAST_ICONS = {
+      ok: '<svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>',
+      err: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>',
+      info: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>'
+    };
+
+    function showToast(text, kind) {
+      if (!text) return;
+      const type = kind === 'err' ? 'err' : kind === 'info' ? 'info' : 'ok';
+      const stack = $('toastStack');
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+
+      const icon = document.createElement('div');
+      icon.className = 'toast-icon';
+      icon.innerHTML = TOAST_ICONS[type];
+      toast.appendChild(icon);
+
+      const msg = document.createElement('div');
+      msg.className = 'toast-text';
+      msg.textContent = text;
+      toast.appendChild(msg);
+
+      const close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'toast-close';
+      close.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+      const dismiss = () => {
+        toast.classList.add('leaving');
+        setTimeout(() => toast.remove(), 150);
+      };
+      close.addEventListener('click', dismiss);
+      toast.appendChild(close);
+
+      stack.appendChild(toast);
+      setTimeout(dismiss, 4000);
+    }
+
+    async function copyKeyCode(code) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(code);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = code;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        showToast('Key disalin: ' + code, 'ok');
+      } catch (error) {
+        showToast('Gagal menyalin key.', 'err');
+      }
+    }
+
+    function countdownOf(exp) {
+      if (!exp) return { text: 'Selamanya', cls: 'exp-never' };
+      const diff = exp - Date.now();
+      if (diff <= 0) return { text: 'Kedaluwarsa', cls: 'exp-out' };
+      const totalMin = Math.floor(diff / 60000);
+      const days = Math.floor(totalMin / 1440);
+      const hours = Math.floor((totalMin % 1440) / 60);
+      const mins = totalMin % 60;
+      const parts = [];
+      if (days > 0) parts.push(days + 'h');
+      if (days > 0 || hours > 0) parts.push(hours + 'j');
+      parts.push(mins + 'm');
+      return { text: parts.join(' '), cls: days < 1 ? 'exp-soon' : '' };
+    }
+
+    function render() {
+      const everything = allRecords();
+      $('countVip').textContent = everything.filter((r) => !isRes(r) && tierOf(r) === 'vip').length;
+      $('countFree').textContent = everything.filter((r) => !isRes(r) && tierOf(r) === 'free').length;
+      $('countRes').textContent = everything.filter(isRes).length;
+      document.querySelectorAll('#tabs .tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === state.tab));
+      document.querySelectorAll('#mainNav .tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
+      const isR = state.view === 'reseller';
+      $('tabs').classList.toggle('hidden', isR);
+      $('resApps').classList.toggle('hidden', !isR);
+      $('genFab').title = $('genFab').ariaLabel = isR ? 'Tambah App ID' : 'Generate key';
+      $('resCredits').classList.toggle('hidden', !isR);
+      $('keyCard').classList.toggle('hidden', !state.viewUser);
+      if (isR) { renderCredits(); renderResApps(); }
+      const allRes = everything.filter(isRes);
+      const all = state.viewUser ? allRes.filter((r) => r.by === state.viewUser) : allRes;
+      $('total').textContent = allRes.length;
+      $('active').textContent = Object.keys(state.users).length;
+
+      if (state.viewUser) {
+        const vu = state.users[state.viewUser] || {};
+        const nm = String(vu.name || 'Reseller');
+        let hue = 0;
+        for (let i = 0; i < nm.length; i++) hue = (hue * 31 + nm.charCodeAt(i)) % 360;
+        const ava = $('keyAva');
+        ava.style.background = 'linear-gradient(135deg, hsl(' + hue + ',55%,48%), hsl(' + ((hue + 40) % 360) + ',60%,36%))';
+        ava.textContent = nm.trim().charAt(0) || '?';
+        $('keyTitle').textContent = nm;
+        const cnt = { active: 0, expired: 0, disabled: 0 };
+        all.forEach((r) => { cnt[statusOf(r)]++; });
+        $('keySub').textContent = all.length + ' key dibuat';
+        const sum = $('keySummary');
+        sum.replaceChildren();
+        [['Total', all.length, ''], ['Aktif', cnt.active, 'g'], ['Kedaluwarsa', cnt.expired, 'r'], ['Nonaktif', cnt.disabled, 'a']].forEach(([lb, n, c]) => {
+          const box = document.createElement('div');
+          box.className = 'kv-sum ' + c;
+          const bb = document.createElement('b'); bb.textContent = n;
+          const sm = document.createElement('small'); sm.textContent = lb;
+          box.append(bb, sm);
+          sum.appendChild(box);
+        });
+        document.querySelectorAll('#keyFilters button').forEach((bt) => bt.classList.toggle('active', bt.dataset.kf === state.keyFilter));
+      }
+
+      const query = $('search').value.trim().toUpperCase();
+      const filtered = all.filter((r) =>
+        (state.keyFilter === 'all' || statusOf(r) === state.keyFilter) &&
+        (!query || String(r.code || '').toUpperCase().includes(query) || String(r.note || '').toUpperCase().includes(query))
+      );
+
+      const list = $('keyList');
+
+      if (filtered.length === 0) {
+        list.replaceChildren();
+        const empty = document.createElement('div');
+        empty.className = 'keylist-empty';
+        empty.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>' +
+          '<span>' + ((query || state.keyFilter !== 'all') ? 'Tidak ada key yang cocok dengan pencarian/filter.' : 'Belum ada key reseller. Key muncul setelah reseller membuat key.') + '</span>';
+        list.appendChild(empty);
+        return;
+      }
+
+      const ICO = {
+        dots: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>',
+        close: '<svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+        copy: '<svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+        clock: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+        phone: '<svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>',
+        extend: '<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M12 14v4M10 16h4"/></svg>',
+        movetier: '<svg class="icon" viewBox="0 0 24 24"><path d="m12 2 3 7 7 .6-5.3 4.7 1.6 7.2L12 17.8 5.7 21.5l1.6-7.2L2 9.6 9 9z"/></svg>',
+        toggle: '<svg class="icon" viewBox="0 0 24 24"><path d="M12 2v10M18.4 6.6a9 9 0 1 1-12.8 0"/></svg>',
+        editmax: '<svg class="icon" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>',
+        resetdev: '<svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M9.5 11.5a3 3 0 1 1 1 2.2M9.5 9v2.5H12"/></svg>',
+        resetkey: '<svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>',
+        delete: '<svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>'
+      };
+      const STATUS_LABEL = { active: 'Aktif', expired: 'Kedaluwarsa', disabled: 'Nonaktif' };
+      const mkBadge = (cls, text, dot) => {
+        const el = document.createElement('span');
+        el.className = 'kr-badge ' + cls + (dot ? ' dot' : '');
+        el.textContent = text;
+        return el;
+      };
+
+      const fragment = document.createDocumentFragment();
+      filtered.forEach((record) => {
+        const st = statusOf(record);
+        const row = document.createElement('div');
+        row.className = 'keyrow st-' + st;
+
+        const body = document.createElement('div');
+        body.className = 'kr-body';
+
+        // Header: judul + badge + menu
+        const head = document.createElement('div');
+        head.className = 'kr-head';
+        const headMain = document.createElement('div');
+        headMain.className = 'kr-head-main';
+        const title = document.createElement('span');
+        title.className = 'kr-title';
+        title.textContent = record.note || (record.app ? record.app : 'Tanpa judul');
+        headMain.appendChild(title);
+        const tags = document.createElement('div');
+        tags.className = 'kr-tags';
+        tags.appendChild(mkBadge('s-' + st, STATUS_LABEL[st], true));
+        if (isRes(record)) tags.appendChild(mkBadge('t-res', 'RESELLER'));
+        else tags.appendChild(mkBadge('t-' + tierOf(record), tierOf(record).toUpperCase()));
+        if (record.app) tags.appendChild(mkBadge('', record.app));
+        headMain.appendChild(tags);
+        head.appendChild(headMain);
+
+        const actionsWrap = document.createElement('div');
+        actionsWrap.className = 'kr-actions';
+        const moreBtn = document.createElement('button');
+        moreBtn.className = 'secondary';
+        moreBtn.innerHTML = ICO.dots;
+        moreBtn.dataset.action = 'menu';
+        moreBtn.setAttribute('aria-label', 'Aksi');
+        actionsWrap.appendChild(moreBtn);
+        const menu = document.createElement('div');
+        menu.className = 'kr-menu';
+        const menuHead = document.createElement('div');
+        menuHead.className = 'kr-menu-head';
+        const menuHeadLabel = document.createElement('span');
+        menuHeadLabel.textContent = record.note || 'Aksi key';
+        const menuCloseBtn = document.createElement('button');
+        menuCloseBtn.type = 'button';
+        menuCloseBtn.className = 'kr-menu-close';
+        menuCloseBtn.dataset.action = 'closemenu';
+        menuCloseBtn.innerHTML = ICO.close;
+        menuHead.append(menuHeadLabel, menuCloseBtn);
+        menu.appendChild(menuHead);
+        const menuItems = [
+          ['label', 'Masa & akses'],
+          ['extend', 'Perpanjang +30 hari'],
+          ['toggle', record.off ? 'Aktifkan key' : 'Nonaktifkan key'],
+          ['movetier', tierOf(record) === 'vip' ? 'Pindah ke FREE' : 'Pindah ke VIP'],
+          ['label', 'Device & key'],
+          ['editmax', 'Edit maks device'],
+          ['resetdev', 'Reset device'],
+          ['resetkey', 'Reset key (key baru)'],
+          ['sep', null],
+          ['delete', 'Hapus key']
+        ];
+        menuItems.forEach(([act, label]) => {
+          if (act === 'sep') {
+            const sep = document.createElement('div');
+            sep.className = 'kr-menu-sep';
+            menu.appendChild(sep);
+            return;
+          }
+          if (act === 'label') {
+            const lb = document.createElement('div');
+            lb.className = 'kr-menu-label';
+            lb.textContent = label;
+            menu.appendChild(lb);
+            return;
+          }
+          const button = document.createElement('button');
+          button.type = 'button';
+          if (act === 'delete') button.className = 'danger-text';
+          button.innerHTML = ICO[act];
+          const sp = document.createElement('span');
+          sp.textContent = label;
+          button.appendChild(sp);
+          button.dataset.action = act;
+          button.dataset.hash = record.h;
+          menu.appendChild(button);
+        });
+        actionsWrap.appendChild(menu);
+        head.appendChild(actionsWrap);
+        body.appendChild(head);
+
+        // Key (klik untuk salin)
+        const keyBox = document.createElement('button');
+        keyBox.type = 'button';
+        keyBox.className = 'kr-keybox secondary';
+        const keyCode = document.createElement('code');
+        keyCode.textContent = record.code || '(hanya hash)';
+        keyBox.appendChild(keyCode);
+        if (record.code) {
+          keyBox.title = 'Klik untuk salin key';
+          keyBox.insertAdjacentHTML('beforeend', ICO.copy);
+          keyBox.addEventListener('click', () => copyKeyCode(record.code));
+        } else {
+          keyBox.disabled = true;
+        }
+        body.appendChild(keyBox);
+
+        // Sisa waktu + device
+        const stats = document.createElement('div');
+        stats.className = 'kr-stats';
+
+        const expField = document.createElement('div');
+        expField.className = 'kr-field kr-field-exp';
+        expField.dataset.exp = record.exp || 0;
+        const expSmall = document.createElement('small');
+        expSmall.innerHTML = ICO.clock;
+        expSmall.append('Sisa waktu');
+        const expB = document.createElement('b');
+        expB.className = 'exp-countdown';
+        const cd = countdownOf(record.exp);
+        expB.textContent = cd.text;
+        if (cd.cls) expB.classList.add(cd.cls);
+        expField.append(expSmall, expB);
+        stats.appendChild(expField);
+
+        const max = maxOf(record);
+        const used = deviceCount(record.h);
+        const devField = document.createElement('div');
+        devField.className = 'kr-field';
+        const devSmall = document.createElement('small');
+        devSmall.innerHTML = ICO.phone;
+        devSmall.append('Device');
+        const devB = document.createElement('b');
+        devB.textContent = !state.devicesOk ? '-' : (max > 0 ? used + ' / ' + max : used + ' / ∞');
+        if (state.devicesOk && max > 0) devB.className = used >= max ? 'full' : 'ok';
+        devField.append(devSmall, devB);
+        if (state.devicesOk && max > 0) {
+          const bar = document.createElement('div');
+          bar.className = 'kr-bar' + (used >= max ? ' full' : '');
+          const fill = document.createElement('i');
+          fill.style.width = Math.min(100, Math.round(used / max * 100)) + '%';
+          bar.appendChild(fill);
+          devField.appendChild(bar);
+        }
+        stats.appendChild(devField);
+        body.appendChild(stats);
+
+        // Tanggal dibuat
+        if (record.createdAt && !isNaN(Date.parse(record.createdAt))) {
+          const foot = document.createElement('div');
+          foot.className = 'kr-foot';
+          foot.textContent = 'Dibuat ' + new Date(record.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+          body.appendChild(foot);
+        }
+
+        row.appendChild(body);
+        fragment.appendChild(row);
+      });
+      list.replaceChildren(fragment);
+    }
+
+    // Menu aksi dipasang fixed di desktop supaya tidak terpotong area scroll daftar.
+    function placeCredMenu(btn, menu) {
+      if (window.innerWidth <= 640) { menu.style.cssText = ''; return; }
+      const r = btn.getBoundingClientRect();
+      const h = menu.offsetHeight;
+      let top = r.bottom + 6;
+      if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - 6 - h);
+      menu.style.position = 'fixed';
+      menu.style.right = 'auto';
+      menu.style.left = Math.max(8, r.right - 220) + 'px';
+      menu.style.top = top + 'px';
+    }
+    function closeCredMenus() { document.querySelectorAll('#credList .kr-menu.open').forEach((m) => m.classList.remove('open')); }
+
+    function renderCredits() {
+      const list = $('credList');
+      list.replaceChildren();
+      const creditOf = (uid) => parseInt((state.users[uid] || {}).credit, 10) || 0;
+      const allUids = Object.keys(state.users).sort((a, b) => String(state.users[a].name).localeCompare(String(state.users[b].name)));
+      const withCredit = allUids.filter((uid) => creditOf(uid) > 0);
+      const noCredit = allUids.filter((uid) => creditOf(uid) <= 0);
+      $('countCredit').textContent = withCredit.length;
+      $('countNoCredit').textContent = noCredit.length;
+      $('statReseller').textContent = allUids.length;
+      $('statCredit').textContent = allUids.reduce((t, uid) => t + creditOf(uid), 0);
+      document.querySelectorAll('#credTabs .tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.ctab === state.credTab));
+      const q = ($('credSearch').value || '').trim().toLowerCase();
+      const tabUids = state.credTab === 'nocredit' ? noCredit : withCredit;
+      const uids = q ? tabUids.filter((uid) => String(state.users[uid].name || uid).toLowerCase().includes(q)) : tabUids;
+      if (!uids.length) {
+        const e = document.createElement('div');
+        e.className = 'keylist-empty';
+        e.textContent = !allUids.length ? 'Belum ada akun reseller.'
+          : (q && tabUids.length ? 'Reseller tidak ditemukan.'
+          : (state.credTab === 'nocredit' ? 'Tidak ada reseller tanpa credit.' : 'Tidak ada reseller yang punya credit.'));
+        list.appendChild(e);
+        return;
+      }
+      uids.forEach((uid) => {
+        const u = state.users[uid] || {};
+        const made = allRecords().filter((r) => isRes(r) && r.by === uid).length;
+        const cr = creditOf(uid);
+        const row = document.createElement('div');
+        row.className = 'cred-row' + (cr <= 0 ? ' is-zero' : (cr <= 5 ? ' is-low' : ''));
+        const nm = String(u.name || uid);
+        let hue = 0;
+        for (let i = 0; i < nm.length; i++) hue = (hue * 31 + nm.charCodeAt(i)) % 360;
+        const av = document.createElement('div');
+        av.className = 'cred-avatar';
+        av.style.background = 'linear-gradient(135deg, hsl(' + hue + ',55%,48%), hsl(' + ((hue + 40) % 360) + ',60%,36%))';
+        av.textContent = nm.trim().charAt(0) || '?';
+        const info = document.createElement('div');
+        info.className = 'cred-info';
+        const b = document.createElement('b');
+        b.textContent = nm;
+        const meta = document.createElement('div');
+        meta.className = 'cred-meta';
+        const c1 = document.createElement('span');
+        c1.className = 'cred-chip';
+        c1.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5 20 3M17 6l3 3M14 9l2 2"/></svg>';
+        c1.append(made + ' Key');
+        meta.appendChild(c1);
+        if (u.linkAccess) {
+          const c2 = document.createElement('span');
+          c2.className = 'cred-chip link';
+          c2.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>';
+          c2.append('Link');
+          meta.appendChild(c2);
+        }
+        info.append(b, meta);
+        const amt = document.createElement('div');
+        amt.className = 'cred-amount';
+        const amtN = document.createElement('strong');
+        amtN.textContent = cr;
+        const amtL = document.createElement('span');
+        amtL.textContent = 'Credit';
+        amt.append(amtN, amtL);
+        const wrap = document.createElement('div');
+        wrap.className = 'kr-actions';
+        const more = document.createElement('button');
+        more.type = 'button'; more.className = 'secondary'; more.setAttribute('aria-label', 'Aksi');
+        more.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>';
+        const menu = document.createElement('div');
+        menu.className = 'kr-menu';
+        const mh = document.createElement('div');
+        mh.className = 'kr-menu-head';
+        const ml = document.createElement('span');
+        ml.textContent = 'Aksi';
+        const mc = document.createElement('button');
+        mc.type = 'button'; mc.className = 'kr-menu-close';
+        mc.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+        mc.addEventListener('click', () => menu.classList.remove('open'));
+        mh.append(ml, mc);
+        const viewBtn = document.createElement('button');
+        viewBtn.type = 'button'; viewBtn.textContent = 'Lihat Key';
+        viewBtn.addEventListener('click', () => {
+          menu.classList.remove('open');
+          state.viewUser = uid;
+          $('search').value = '';
+          render();
+          $('keyCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        const giveBtn = document.createElement('button');
+        giveBtn.type = 'button'; giveBtn.textContent = 'Give Credit';
+        giveBtn.addEventListener('click', () => { menu.classList.remove('open'); openGiveCredit(uid); });
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button'; delBtn.className = 'danger-text'; delBtn.textContent = 'Hapus Credit';
+        delBtn.addEventListener('click', async () => {
+          menu.classList.remove('open');
+          const cur = parseInt(u.credit, 10) || 0;
+          if (cur <= 0) { showToast('Credit sudah 0.', 'info'); return; }
+          if (!(await confirmDialog('Hapus semua credit ' + (u.name || uid) + ' (' + cur + ')?', { title: 'Hapus Credit', danger: true }))) return;
+          try {
+            await db.ref('users/' + uid + '/credit').set(0);
+            state.users[uid].credit = 0;
+            render(); showToast('Credit ' + (u.name || '') + ' dihapus.', 'ok');
+          } catch (error) { showToast(friendlyError(error), 'err'); }
+        });
+        const accBtn = document.createElement('button');
+        accBtn.type = 'button'; accBtn.textContent = u.linkAccess ? 'Cabut Akses Link' : 'Give Akses Link';
+        accBtn.addEventListener('click', async () => {
+          menu.classList.remove('open');
+          const next = !u.linkAccess;
+          try {
+            await db.ref('users/' + uid + '/linkAccess').set(next ? true : null);
+            if (!state.users[uid]) state.users[uid] = {};
+            if (next) state.users[uid].linkAccess = true; else delete state.users[uid].linkAccess;
+            render();
+            showToast(next ? 'Akses link diberikan ke ' + (u.name || 'reseller') + '.' : 'Akses link dicabut.', 'ok');
+          } catch (error) { showToast(friendlyError(error), 'err'); }
+        });
+        menu.append(mh, viewBtn, giveBtn, accBtn, delBtn);
+        more.addEventListener('click', () => {
+          const was = menu.classList.contains('open');
+          document.querySelectorAll('.kr-menu.open').forEach((m) => m.classList.remove('open'));
+          if (!was) { menu.classList.add('open'); placeCredMenu(more, menu); }
+        });
+        wrap.append(more, menu);
+        row.append(av, info, amt, wrap);
+        list.appendChild(row);
+      });
+    }
+
+    function openGiveCredit(uid) {
+      const u = state.users[uid] || {};
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay confirm-overlay';
+      const box = document.createElement('div');
+      box.className = 'modal-box confirm-box glass';
+      const title = document.createElement('h3');
+      title.className = 'confirm-title';
+      title.textContent = 'Give Credit: ' + (u.name || uid);
+      const text = document.createElement('p');
+      text.className = 'confirm-text';
+      text.textContent = 'Credit sekarang: ' + (parseInt(u.credit, 10) || 0) + '. Isi angka minus untuk mengurangi.';
+      const input = document.createElement('input');
+      input.type = 'number'; input.step = '1'; input.value = '10';
+      const actions = document.createElement('div');
+      actions.className = 'confirm-actions';
+      const cancel = document.createElement('button');
+      cancel.type = 'button'; cancel.className = 'secondary'; cancel.textContent = 'Batal';
+      const ok = document.createElement('button');
+      ok.type = 'button'; ok.className = 'green'; ok.textContent = 'Berikan';
+      actions.append(cancel, ok);
+      box.append(title, text, input, actions);
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+      const close = () => overlay.remove();
+      cancel.addEventListener('click', close);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+      ok.addEventListener('click', async () => {
+        const n = parseInt(input.value, 10);
+        if (!n) { showToast('Isi jumlah credit.', 'err'); return; }
+        ok.disabled = true;
+        try {
+          const res = await db.ref('users/' + uid + '/credit').transaction((c) => Math.max((parseInt(c, 10) || 0) + n, 0));
+          if (!state.users[uid]) state.users[uid] = {};
+          state.users[uid].credit = res.snapshot.val() || 0;
+          close(); render();
+          showToast('Credit ' + (u.name || '') + ': ' + state.users[uid].credit, 'ok');
+        } catch (error) { ok.disabled = false; showToast(friendlyError(error), 'err'); }
+      });
+      input.focus(); input.select();
+    }
+
+    function appOrderOf(id) {
+      const a = state.resellerApps[id];
+      return a && Number.isFinite(a.order) ? a.order : 1e9;
+    }
+    function sortedAppIds() {
+      return Object.keys(state.resellerApps).sort((a, b) => appOrderOf(a) - appOrderOf(b) || a.localeCompare(b));
+    }
+    function nextAppOrder() {
+      const ids = sortedAppIds();
+      ids.forEach((id, i) => { if (state.resellerApps[id]) state.resellerApps[id].order = i; });
+      return ids.length;
+    }
+
+    function renderResApps() {
+      const list = $('resAppList');
+      const ids = sortedAppIds();
+      $('appCount').textContent = ids.length;
+      list.replaceChildren();
+      if (!ids.length) {
+        const e = document.createElement('div');
+        e.className = 'keylist-empty';
+        e.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
+        e.append('Belum ada App ID. Tambahkan dengan tombol + agar muncul di web reseller.');
+        list.appendChild(e);
+        return;
+      }
+      const allRec = allRecords();
+      ids.forEach((id) => {
+        const app = state.resellerApps[id] || {};
+        const used = allRec.filter((r) => isRes(r) && r.app === id).length;
+        const isOff = !!app.disabled;
+        const appName = app.name || id;
+        const row = document.createElement('div');
+        row.className = 'res-row app-row' + (isOff ? ' is-off' : '');
+        row.dataset.id = id;
+
+        const grip = document.createElement('div');
+        grip.className = 'app-grip';
+        grip.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/></svg>';
+
+        const ava = document.createElement('div');
+        ava.className = 'app-ava';
+        let hue = 0;
+        for (let i = 0; i < id.length; i++) hue = (hue * 31 + id.charCodeAt(i)) % 360;
+        ava.style.background = 'linear-gradient(135deg, hsl(' + hue + ',55%,48%), hsl(' + ((hue + 40) % 360) + ',60%,36%))';
+        ava.textContent = String(appName).trim().charAt(0) || '?';
+        if (app.logo && /^https?:\/\//.test(app.logo)) {
+          const im = document.createElement('img');
+          im.alt = ''; im.referrerPolicy = 'no-referrer'; im.onerror = () => im.remove(); im.src = app.logo;
+          ava.appendChild(im);
+        }
+
+        const info = document.createElement('div');
+        info.className = 'app-info';
+        const b = document.createElement('b');
+        b.textContent = appName;
+        const meta = document.createElement('div');
+        meta.className = 'app-meta';
+        const cId = document.createElement('span');
+        cId.className = 'app-chip mono';
+        cId.textContent = id;
+        const cKey = document.createElement('span');
+        cKey.className = 'app-chip';
+        cKey.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M10.5 12.5 20 3M17 6l3 3M14 9l2 2"/></svg>';
+        cKey.append(used + ' Key');
+        const cSt = document.createElement('span');
+        cSt.className = 'app-chip ' + (isOff ? 'off' : 'on');
+        cSt.textContent = isOff ? 'Nonaktif' : 'Aktif';
+        meta.append(cId, cKey, cSt);
+        info.append(b, meta);
+
+        const main = document.createElement('div');
+        main.className = 'app-main';
+        main.append(ava, info);
+
+        const tog = document.createElement('button');
+        tog.type = 'button'; tog.className = 'app-toggle';
+        tog.setAttribute('role', 'switch');
+        tog.setAttribute('aria-checked', isOff ? 'false' : 'true');
+        tog.setAttribute('aria-label', isOff ? 'Aktifkan App ID' : 'Nonaktifkan App ID');
+        tog.innerHTML = '<span class="track"><i></i></span><span class="lbl">' + (isOff ? 'Nonaktif' : 'Aktif') + '</span>';
+        tog.addEventListener('click', async () => {
+          const next = !isOff;
+          tog.disabled = true;
+          try {
+            await db.ref(APPS_PATH + '/' + id + '/disabled').set(next ? true : null);
+            if (next) state.resellerApps[id].disabled = true; else delete state.resellerApps[id].disabled;
+            render();
+            showToast(next ? 'App ID dinonaktifkan.' : 'App ID diaktifkan.', 'ok');
+          } catch (error) { tog.disabled = false; showToast(friendlyError(error), 'err'); }
+        });
+
+        const ed = document.createElement('button');
+        ed.className = 'secondary app-icobtn'; ed.type = 'button';
+        ed.title = 'Edit'; ed.setAttribute('aria-label', 'Edit App ID');
+        ed.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+        ed.addEventListener('click', () => {
+          $('resAppId').value = id; $('resAppName').value = appName;
+          $('resAppLogo').value = app.logo || '';
+          $('resAppApk').value = app.apk || '';
+          openResApp();
+        });
+
+        const del = document.createElement('button');
+        del.className = 'danger app-icobtn'; del.type = 'button';
+        del.title = 'Hapus'; del.setAttribute('aria-label', 'Hapus App ID');
+        del.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
+        del.addEventListener('click', async () => {
+          if (!(await confirmDialog('Hapus App ID ' + id + ' dari web reseller? Key yang sudah dibuat tetap ada.', { title: 'Hapus App ID', danger: true }))) return;
+          try {
+            delete state.resellerApps[id];
+            await db.ref(APPS_PATH).set(Object.keys(state.resellerApps).length ? state.resellerApps : null);
+            render(); showToast('App ID dihapus.', 'ok');
+          } catch (error) { showToast(friendlyError(error), 'err'); }
+        });
+
+        const btns = document.createElement('div');
+        btns.className = 'app-btns';
+        btns.style.display = 'flex'; btns.style.gap = '6px';
+        btns.append(ed, del);
+        const actions = document.createElement('div');
+        actions.className = 'app-actions';
+        actions.append(tog, btns);
+
+        row.append(grip, main, actions);
+        list.appendChild(row);
+      });
+    }
+
+    async function saveResApp() {
+      const id = $('resAppId').value.trim();
+      const name = $('resAppName').value.trim();
+      if (!/^[A-Za-z0-9_-]{1,40}$/.test(id)) { showToast('App ID hanya huruf, angka, - dan _.', 'err'); return; }
+      const logo = $('resAppLogo').value.trim();
+      const apk = $('resAppApk').value.trim();
+      if (apk && !/^https?:\/\/\S{3,900}$/.test(apk)) { showToast('Link APK harus diawali http:// atau https://', 'err'); return; }
+      if (logo && !/^https?:\/\/\S{3,480}$/.test(logo)) { showToast('Link logo harus diawali http:// atau https://', 'err'); return; }
+      try {
+        const prev = state.resellerApps[id];
+        const ord = prev && Number.isFinite(prev.order) ? prev.order : nextAppOrder();
+        state.resellerApps[id] = { name: name || id, order: ord };
+        if (prev && prev.disabled) state.resellerApps[id].disabled = true;
+        if (logo) state.resellerApps[id].logo = logo;
+        if (apk) state.resellerApps[id].apk = apk;
+        await db.ref(APPS_PATH).set(state.resellerApps);
+        $('resAppId').value = ''; $('resAppName').value = ''; $('resAppLogo').value = ''; $('resAppApk').value = '';
+        closeResApp();
+        render(); showToast('App ID disimpan.', 'ok');
+      } catch (error) { showToast(friendlyError(error), 'err'); }
+    }
+
+    function tickCountdowns() {
+      document.querySelectorAll('.kr-field-exp').forEach((field) => {
+        const exp = parseInt(field.dataset.exp, 10) || 0;
+        const b = field.querySelector('.exp-countdown');
+        if (!b) return;
+        const cd = countdownOf(exp);
+        b.textContent = cd.text;
+        b.className = 'exp-countdown' + (cd.cls ? ' ' + cd.cls : '');
+      });
+    }
+    setInterval(tickCountdowns, 30000);
+
+    async function load() {
+      setMsg('listMsg', 'Memuat data...');
+      const results = await Promise.all([
+        db.ref(PRIVATE_PATH).once('value'),
+        db.ref(PUBLIC_PATH).once('value'),
+        db.ref(DEVICE_PATH).once('value').catch(() => null),
+        db.ref(RESELLER_PATH).once('value').catch(() => null),
+        db.ref(APPS_PATH).once('value').catch(() => null),
+        db.ref(DELETE_PATH).once('value').catch(() => null),
+        db.ref('users').once('value').catch(() => null)
+      ]);
+      const raw = results[0].val();
+      state.records = raw && typeof raw === 'object' ? raw : {};
+      const usersRaw = results[6] ? results[6].val() : null;
+      state.users = usersRaw && typeof usersRaw === 'object' ? usersRaw : {};
+      const appsRaw = results[4] ? results[4].val() : null;
+      state.resellerApps = appsRaw && typeof appsRaw === 'object' ? appsRaw : {};
+      const queued = results[3] ? results[3].val() : null;
+      let merged = false;
+      if (queued && typeof queued === 'object') {
+        const upd = {};
+        Object.keys(queued).forEach((h) => {
+          const q = queued[h];
+          if (!q || !q.code) return;
+          if (!state.records[h]) {
+            state.records[h] = {
+              code: String(q.code), app: String(q.app || ''), exp: Math.max(parseInt(q.exp, 10) || 0, 0), off: false,
+              max: Math.max(parseInt(q.max, 10) || 0, 0), note: String(q.note || '').slice(0, 80),
+              tier: 'vip', reseller: true, by: String(q.by || ''), byName: String(q.byName || '').slice(0, 30), createdAt: q.createdAt || new Date().toISOString()
+            };
+          }
+          upd[RESELLER_PATH + '/' + h] = null;
+          merged = true;
+        });
+        if (merged) {
+          upd[PUBLIC_PATH] = buildLicensesPayload(state.records);
+          upd[PRIVATE_PATH] = state.records;
+          upd[APPS_PATH] = buildApps(state.records);
+          await db.ref().update(upd);
+          showToast('Key reseller baru masuk ke License.', 'info');
+        }
+      }
+      const delReq = results[5] ? results[5].val() : null;
+      if (delReq && typeof delReq === 'object') {
+        const upd = {};
+        let removed = 0;
+        Object.keys(delReq).forEach((h) => {
+          if (state.records[h] && isRes(state.records[h])) {
+            delete state.records[h];
+            upd[DEVICE_PATH + '/' + h] = null;
+            removed += 1;
+          }
+          upd[DELETE_PATH + '/' + h] = null;
+        });
+        upd[PUBLIC_PATH] = buildLicensesPayload(state.records);
+        upd[PRIVATE_PATH] = state.records;
+        await db.ref().update(upd);
+        if (removed) showToast(removed + ' key reseller dihapus.', 'info');
+      }
+      const deviceSnapshot = results[2];
+      const devices = deviceSnapshot ? deviceSnapshot.val() : null;
+      state.devices = devices && typeof devices === 'object' ? devices : {};
+      state.devicesOk = !!deviceSnapshot;
+      if (!state.devicesOk) {
+        setMsg('listMsg', '', '');
+        showToast('Node deviceRegs gagal dibaca.', 'err');
+      }
+      if (!results[1].exists() && !merged) {
+        await db.ref().update({
+          [PUBLIC_PATH]: buildLicensesPayload(state.records),
+          [PRIVATE_PATH]: state.records,
+        [APPS_PATH]: buildApps(state.records)
+        });
+        if (state.devicesOk) {
+          setMsg('listMsg', '');
+          showToast(raw ? 'Node licenses dibuat ulang.' : 'Database masih kosong.', 'info');
+        }
+      } else if (state.devicesOk) {
+        setMsg('listMsg', '');
+      }
+      render();
+    }
+
+    async function persist(silent) {
+      setMsg('listMsg', 'Menyimpan...');
+      await db.ref().update({
+        [PUBLIC_PATH]: buildLicensesPayload(state.records),
+        [PRIVATE_PATH]: state.records,
+        [APPS_PATH]: buildApps(state.records)
+      });
+      setMsg('listMsg', '');
+      if (!silent) showToast('Tersimpan di Firebase.', 'ok');
+    }
+
+    async function generate() {
+      const noteInput = $('genNote');
+      const note = noteInput.value.trim();
+      if (!note) {
+        noteInput.focus();
+        showToast('Title wajib diisi.', 'err');
+        return;
+      }
+      const button = $('genBtn');
+      button.disabled = true;
+      button.classList.add('loading');
+      try {
+        const count = Math.min(Math.max(parseInt($('genCount').value, 10) || 1, 1), 200);
+        const app = $('genAppId').value.trim() || 'app1';
+        const days = Math.max(parseInt($('genExpiry').value, 10) || 0, 0);
+        const max = Math.max(parseInt($('genMax').value, 10) || 0, 0);
+        const tier = $('genTier').value === 'free' ? 'free' : 'vip';
+        const exp = days > 0 ? Date.now() + days * 86400000 : 0;
+        const created = [];
+        for (let i = 0; i < count; i += 1) {
+          const code = makeCode();
+          const h = await sha256Hex(normalizeCode(code));
+          state.records[h] = { code, app, exp, off: false, max, note, tier, createdAt: new Date().toISOString() };
+          created.push(state.records[h]);
+        }
+        await persist();
+        const resultBox = $('genResult');
+        resultBox.classList.remove('hidden');
+        resultBox.replaceChildren();
+
+        const head = document.createElement('div');
+        head.className = 'gen-result-head';
+        head.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>' +
+          (created.length === 1 ? '1 key ' + tier.toUpperCase() + ' berhasil dibuat' : created.length + ' key ' + tier.toUpperCase() + ' berhasil dibuat');
+        resultBox.appendChild(head);
+
+        const body = document.createElement('div');
+        body.className = 'gen-result-body';
+        created.forEach((record) => {
+          const chip = document.createElement('div');
+          chip.className = 'gen-key-chip';
+          chip.title = 'Klik untuk salin';
+          const code = document.createElement('code');
+          code.textContent = record.code;
+          const copyIcon = document.createElement('svg');
+          copyIcon.setAttribute('class', 'icon');
+          copyIcon.setAttribute('viewBox', '0 0 24 24');
+          copyIcon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>';
+          chip.appendChild(code);
+          chip.appendChild(copyIcon);
+          chip.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(record.code);
+              showToast('Key disalin.', 'ok');
+            } catch (error) {
+              showToast('Gagal menyalin key.', 'err');
+            }
+          });
+          body.appendChild(chip);
+        });
+        resultBox.appendChild(body);
+
+        clearTimeout(window.__genResultTimeout);
+        window.__genResultTimeout = setTimeout(() => {
+          resultBox.classList.add('hidden');
+          resultBox.replaceChildren();
+        }, 3000);
+
+        noteInput.value = '';
+        state.tab = tier;
+        render();
+      } catch (error) {
+        showToast(friendlyError(error), 'err');
+      } finally {
+        button.disabled = false;
+        button.classList.remove('loading');
+      }
+    }
+
+    async function action(event) {
+      const menuToggle = event.target.closest('button[data-action="menu"]');
+      if (menuToggle) {
+        const menu = menuToggle.parentElement.querySelector('.kr-menu');
+        const wasOpen = menu.classList.contains('open');
+        document.querySelectorAll('.kr-menu.open').forEach((m) => m.classList.remove('open'));
+        if (!wasOpen) menu.classList.add('open');
+        return;
+      }
+      const closeBtn = event.target.closest('button[data-action="closemenu"]');
+      if (closeBtn) {
+        closeBtn.closest('.kr-menu').classList.remove('open');
+        return;
+      }
+      const button = event.target.closest('button[data-action]');
+      if (!button) return;
+      const openMenu = button.closest('.kr-menu');
+      if (openMenu) openMenu.classList.remove('open');
+      const h = button.dataset.hash;
+      const record = state.records[h];
+      if (!record) return;
+      try {
+        if (button.dataset.action === 'delete') {
+          if (!(await confirmDialog('Hapus key ' + (record.code || h) + ' beserta daftar device-nya?', { title: 'Hapus key', danger: true }))) return;
+          delete state.records[h];
+          const cleaned = await clearDevices(h);
+          await persist(true);
+          render();
+          showToast(cleaned ? 'Key dihapus.' : 'Key dihapus, device gagal dihapus.', cleaned ? 'ok' : 'err');
+          return;
+        } else if (button.dataset.action === 'movetier') {
+          const next = tierOf(record) === 'vip' ? 'free' : 'vip';
+          record.tier = next;
+          await persist(true);
+          render();
+          showToast('Key dipindah ke ' + next.toUpperCase() + '.', 'ok');
+          return;
+        } else if (button.dataset.action === 'toggle') {
+          record.off = !record.off;
+        } else if (button.dataset.action === 'extend') {
+          const base = record.exp && record.exp > Date.now() ? record.exp : Date.now();
+          record.exp = base + 30 * 86400000;
+          record.off = false;
+        } else if (button.dataset.action === 'editmax') {
+          openEditMaxModal(h, record);
+          return;
+        } else if (button.dataset.action === 'resetkey') {
+          if (!(await confirmDialog('Ganti key ' + (record.code || h) + ' dengan key baru? Key lama langsung tidak berlaku, daftar device tetap dipertahankan.', { title: 'Reset key' }))) return;
+          let code = makeCode();
+          let newHash = await sha256Hex(normalizeCode(code));
+          while (state.records[newHash]) {
+            code = makeCode();
+            newHash = await sha256Hex(normalizeCode(code));
+          }
+          const updated = Object.assign({}, record, { code });
+          delete state.records[h];
+          state.records[newHash] = updated;
+          let moved = true;
+          const oldDevices = state.devices[h];
+          if (oldDevices && typeof oldDevices === 'object' && Object.keys(oldDevices).length) {
+            try {
+              await db.ref(DEVICE_PATH + '/' + newHash).set(oldDevices);
+              await db.ref(DEVICE_PATH + '/' + h).remove();
+              state.devices[newHash] = oldDevices;
+              delete state.devices[h];
+            } catch (error) {
+              moved = false;
+            }
+          }
+          await persist(true);
+          render();
+          await copyKeyCode(code);
+          if (!moved) showToast('Key diganti, tapi device gagal dipindah.', 'err');
+          return;
+        } else if (button.dataset.action === 'resetdev') {
+          const used = deviceCount(h);
+          if (!used) {
+            showToast('Belum ada device terdaftar.', 'info');
+            return;
+          }
+          if (!(await confirmDialog('Reset ' + used + ' device untuk key ' + (record.code || h) + '? Device harus install ulang / logout.', { title: 'Reset device', danger: true }))) return;
+          const cleared = await clearDevices(h);
+          if (cleared) {
+            await load();
+            showToast('Daftar device direset.', 'ok');
+          } else {
+            delete state.devices[h];
+            render();
+            showToast('Rules menolak penghapusan device.', 'err');
+          }
+          return;
+        }
+        await persist();
+        render();
+      } catch (error) {
+        showToast(friendlyError(error), 'err');
+      }
+    }
+
+    function closeEditMaxModal() {
+      const overlay = $('editMaxOverlay');
+      if (overlay) overlay.remove();
+    }
+
+    function openEditMaxModal(hash, record) {
+      closeEditMaxModal();
+      const current = maxOf(record);
+
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.id = 'editMaxOverlay';
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeEditMaxModal(); });
+
+      const box = document.createElement('div');
+      box.className = 'modal-box glass';
+
+      const mhead = document.createElement('div');
+      mhead.className = 'modal-head';
+      const mic = document.createElement('div');
+      mic.className = 'modal-ic';
+      mic.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>';
+      const mtxt = document.createElement('div');
+      const mt = document.createElement('b');
+      mt.textContent = 'Maks device';
+      const ms = document.createElement('small');
+      ms.textContent = record.code || hash;
+      mtxt.append(mt, ms);
+      mhead.append(mic, mtxt);
+      box.appendChild(mhead);
+
+      const stepper = document.createElement('div');
+      stepper.className = 'modal-stepper';
+      const minusBtn = document.createElement('button');
+      minusBtn.type = 'button';
+      minusBtn.textContent = '−';
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = '0';
+      input.value = String(current);
+      input.id = 'editMaxInput';
+      const plusBtn = document.createElement('button');
+      plusBtn.type = 'button';
+      plusBtn.textContent = '+';
+      stepper.appendChild(minusBtn);
+      stepper.appendChild(input);
+      stepper.appendChild(plusBtn);
+      box.appendChild(stepper);
+      const hint = document.createElement('p');
+      hint.className = 'modal-hint';
+      hint.textContent = 'Isi 0 untuk tak terbatas.';
+      box.appendChild(hint);
+
+      minusBtn.addEventListener('click', () => {
+        input.value = String(Math.max((parseInt(input.value, 10) || 0) - 1, 0));
+      });
+      plusBtn.addEventListener('click', () => {
+        input.value = String((parseInt(input.value, 10) || 0) + 1);
+      });
+
+      const actions = document.createElement('div');
+      actions.className = 'modal-actions';
+      const cancelBtn = document.createElement('button');
+      cancelBtn.type = 'button';
+      cancelBtn.className = 'secondary';
+      cancelBtn.textContent = 'Batal';
+      cancelBtn.addEventListener('click', closeEditMaxModal);
+      const saveBtn = document.createElement('button');
+      saveBtn.type = 'button';
+      saveBtn.textContent = 'Simpan';
+      saveBtn.addEventListener('click', async () => {
+        const next = Math.max(parseInt(input.value, 10) || 0, 0);
+        closeEditMaxModal();
+        if (next === current) return;
+        try {
+          record.max = next;
+          await persist(true);
+          render();
+          showToast(next === 0 ? 'Maks device diubah: tak terbatas.' : 'Maks device diubah: ' + next + '.', 'ok');
+        } catch (error) {
+          showToast(friendlyError(error), 'err');
+        }
+      });
+      actions.appendChild(cancelBtn);
+      actions.appendChild(saveBtn);
+      box.appendChild(actions);
+
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+      input.focus();
+      input.select();
+    }
+
+    function confirmDialog(message, opts) {
+      opts = opts || {};
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay confirm-overlay';
+        const box = document.createElement('div');
+        box.className = 'modal-box confirm-box glass';
+        const title = document.createElement('h3');
+        title.className = 'confirm-title';
+        title.textContent = opts.title || 'Konfirmasi';
+        const text = document.createElement('p');
+        text.className = 'confirm-text';
+        text.textContent = message;
+        const actions = document.createElement('div');
+        actions.className = 'confirm-actions';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.className = 'secondary';
+        cancelBtn.textContent = 'Batal';
+        const okBtn = document.createElement('button');
+        okBtn.type = 'button';
+        if (opts.danger) okBtn.className = 'danger';
+        okBtn.textContent = 'OK';
+        actions.appendChild(cancelBtn);
+        actions.appendChild(okBtn);
+        box.appendChild(title);
+        box.appendChild(text);
+        box.appendChild(actions);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+        const done = (val) => {
+          document.removeEventListener('keydown', onKey, true);
+          overlay.remove();
+          resolve(val);
+        };
+        const onKey = (e) => {
+          if (e.key === 'Escape') { e.stopPropagation(); done(false); }
+        };
+        document.addEventListener('keydown', onKey, true);
+        cancelBtn.addEventListener('click', () => done(false));
+        okBtn.addEventListener('click', () => done(true));
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) done(false); });
+        okBtn.focus();
+      });
+    }
+
+    async function clearDevices(hash) {
+      try {
+        await db.ref(DEVICE_PATH + '/' + hash).remove();
+        delete state.devices[hash];
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    async function login() {
+      const email = $('email').value.trim();
+      const password = $('password').value;
+      if (!email || !password) {
+        setLoginMsg('Email dan password wajib diisi.', 'err');
+        return;
+      }
+      const button = $('loginBtn');
+      button.disabled = true;
+      button.classList.add('loading');
+      setLoginMsg('', '');
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+        setLoginMsg(friendlyError(error), 'err');
+      } finally {
+        button.disabled = false;
+        button.classList.remove('loading');
+      }
+    }
+
+    async function afterLogin(user) {
+      $('who').textContent = user ? user.email : '-';
+      $('whoAvatar').textContent = user && user.email ? user.email.charAt(0).toUpperCase() : 'A';
+      $('loginScreen').classList.add('hidden');
+      $('adminScreen').classList.remove('hidden');
+      try {
+        await load();
+      } catch (error) {
+        showToast(friendlyError(error), 'err');
+      }
+    }
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        afterLogin(user);
+      } else {
+        closeEditMaxModal();
+        document.querySelectorAll('.kr-menu.open').forEach((m) => m.classList.remove('open'));
+        $('adminScreen').classList.add('hidden');
+        $('loginScreen').classList.remove('hidden');
+        $('password').value = '';
+        setLoginMsg('', '');
+        $('who').textContent = '-';
+        $('whoAvatar').textContent = 'A';
+      }
+    });
+
+    $('loginForm').addEventListener('submit', (e) => { e.preventDefault(); login(); });
+    $('pwToggle').addEventListener('click', () => {
+      const pwInput = $('password');
+      const showing = pwInput.type === 'text';
+      pwInput.type = showing ? 'password' : 'text';
+      $('pwToggle').innerHTML = showing
+        ? '<svg class="icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>'
+        : '<svg class="icon" viewBox="0 0 24 24"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.86 21.86 0 0 1 5.06-6.06M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>';
+      $('pwToggle').setAttribute('aria-label', showing ? 'Tampilkan password' : 'Sembunyikan password');
+    });
+    // Tahan lama pada baris App ID lalu geser ke atas/bawah untuk mengatur urutan
+    (function () {
+      const list = $('resAppList');
+      let timer = null, start = null, drag = null;
+      const cancelTimer = () => { clearTimeout(timer); timer = null; };
+      list.addEventListener('pointerdown', (e) => {
+        if (e.button > 0 || e.target.closest('button')) return;
+        const row = e.target.closest('.res-row');
+        if (!row || !row.dataset.id) return;
+        cancelTimer();
+        start = { x: e.clientX, y: e.clientY, row };
+        timer = setTimeout(begin, 420);
+      });
+      function begin() {
+        timer = null;
+        if (!start) return;
+        const row = start.row;
+        drag = { row, grab: start.y - row.getBoundingClientRect().top, y: start.y, before: sortedAppIds() };
+        row.classList.add('dragging');
+        list.classList.add('reordering');
+        if (navigator.vibrate) navigator.vibrate(15);
+        drag.iv = setInterval(() => {
+          if (drag.y < 70) window.scrollBy(0, -10);
+          else if (drag.y > window.innerHeight - 70) window.scrollBy(0, 10);
+          place();
+        }, 30);
+      }
+      function place() {
+        const { row, grab, y } = drag;
+        let ref = null;
+        for (const o of list.querySelectorAll('.res-row')) {
+          if (o === row) continue;
+          const b = o.getBoundingClientRect();
+          if (y < b.top + b.height / 2) { ref = o; break; }
+        }
+        if (row.nextElementSibling !== ref) list.insertBefore(row, ref);
+        row.style.transform = '';
+        const natural = row.getBoundingClientRect().top;
+        row.style.transform = 'translateY(' + (y - grab - natural) + 'px)';
+      }
+      document.addEventListener('pointermove', (e) => {
+        if (!drag) {
+          if (start && Math.hypot(e.clientX - start.x, e.clientY - start.y) > 8) { cancelTimer(); start = null; }
+          return;
+        }
+        e.preventDefault();
+        drag.y = e.clientY;
+        place();
+      });
+      document.addEventListener('touchmove', (e) => { if (drag) e.preventDefault(); }, { passive: false });
+      list.addEventListener('contextmenu', (e) => { if (e.target.closest('.res-row')) e.preventDefault(); });
+      function end(commit) {
+        cancelTimer();
+        start = null;
+        if (!drag) return;
+        const d = drag;
+        drag = null;
+        clearInterval(d.iv);
+        d.row.classList.remove('dragging');
+        d.row.style.transform = '';
+        list.classList.remove('reordering');
+        const ids = Array.from(list.querySelectorAll('.res-row')).map((r) => r.dataset.id);
+        if (!commit || ids.join() === d.before.join()) { render(); return; }
+        ids.forEach((id, i) => { if (state.resellerApps[id]) state.resellerApps[id].order = i; });
+        db.ref(APPS_PATH).set(state.resellerApps)
+          .then(() => showToast('Urutan disimpan.', 'ok'))
+          .catch((error) => {
+            d.before.forEach((id, i) => { if (state.resellerApps[id]) state.resellerApps[id].order = i; });
+            render();
+            showToast(friendlyError(error), 'err');
+          });
+      }
+      document.addEventListener('pointerup', () => end(true));
+      document.addEventListener('pointercancel', () => end(false));
+    })();
+    $('genBtn').addEventListener('click', generate);
+    $('resAppSave').addEventListener('click', saveResApp);
+    $('keyFilters').addEventListener('click', (e) => {
+      const bt = e.target.closest('button[data-kf]');
+      if (!bt) return;
+      state.keyFilter = bt.dataset.kf;
+      render();
+    });
+    $('keyBack').addEventListener('click', () => {
+      state.viewUser = null;
+      state.keyFilter = 'all';
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    $('mainNav').addEventListener('click', (e) => {
+      const b = e.target.closest('.tab-btn');
+      if (!b) return;
+      state.view = b.dataset.view;
+      state.tab = state.view === 'reseller' ? 'reseller' : (state.tab === 'reseller' ? 'vip' : state.tab);
+      render();
+    });
+    function openGen() { $('genOverlay').classList.remove('hidden'); setTimeout(() => $('genNote').focus(), 50); }
+    function closeGen() { $('genOverlay').classList.add('hidden'); }
+    function openResApp() { $('resAppOverlay').classList.remove('hidden'); setTimeout(() => $('resAppId').focus(), 50); }
+    function closeResApp() { $('resAppOverlay').classList.add('hidden'); }
+    $('genFab').addEventListener('click', () => { if (state.view === 'reseller') openResApp(); else openGen(); });
+    $('resAppClose').addEventListener('click', closeResApp);
+    document.querySelectorAll('.paste-btn').forEach((btn) => btn.addEventListener('click', async () => {
+      const target = $(btn.dataset.target);
+      try {
+        const text = (await navigator.clipboard.readText()).trim();
+        if (!text) { showToast('Clipboard kosong.', 'info'); return; }
+        target.value = text;
+        showToast('Link ditempel.', 'ok');
+      } catch (error) {
+        showToast('Tidak bisa membaca clipboard. Tempel manual.', 'err');
+        target.focus();
+      }
+    }));
+    $('resAppOverlay').addEventListener('click', (e) => { if (e.target === $('resAppOverlay')) closeResApp(); });
+    $('genClose').addEventListener('click', closeGen);
+    $('genOverlay').addEventListener('click', (e) => { if (e.target === $('genOverlay')) closeGen(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeGen(); closeResApp(); } });
+    $('tabs').addEventListener('click', (e) => {
+      const b = e.target.closest('.tab-btn');
+      if (!b) return;
+      state.tab = b.dataset.tab;
+      render();
+    });
+    $('credSearch').addEventListener('input', renderCredits);
+    $('credList').addEventListener('scroll', closeCredMenus, { passive: true });
+    window.addEventListener('scroll', () => { if (window.innerWidth > 640) closeCredMenus(); }, { passive: true });
+    window.addEventListener('resize', closeCredMenus);
+    $('credTabs').addEventListener('click', (e) => {
+      const b = e.target.closest('.tab-btn');
+      if (!b) return;
+      state.credTab = b.dataset.ctab;
+      render();
+    });
+    $('keyList').addEventListener('click', action);
+    $('refreshBtn').addEventListener('click', () => load().catch((error) => showToast(friendlyError(error), 'err')));
+    $('logoutBtn').addEventListener('click', () => {
+      const button = $('logoutBtn');
+      button.disabled = true;
+      auth.signOut()
+        .catch((error) => showToast(friendlyError(error), 'err'))
+        .finally(() => { button.disabled = false; });
+    });
+    $('search').addEventListener('input', () => {
+      clearTimeout(window.__searchDebounce);
+      window.__searchDebounce = setTimeout(render, 200);
+    });
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.kr-actions')) {
+        document.querySelectorAll('.kr-menu.open').forEach((m) => m.classList.remove('open'));
+      }
+    });
+  </script>
+</body>
+</html>
